@@ -1,0 +1,116 @@
+global _start
+
+section .bss
+buffer resb 128
+outbuf resb 32
+
+section .text
+_start:
+    mov eax, 0
+    mov edi, 0
+    mov rsi, buffer
+    mov edx, 128
+    syscall
+
+    mov rsi, buffer
+    call read_int
+    mov r12, rax
+    call read_int
+    add rax, r12
+    mov rdi, rax
+    call write_int
+
+    mov eax, 60
+    xor edi, edi
+    syscall
+
+read_int:
+    xor rax, rax
+    xor rbx, rbx
+
+.skip_ws:
+    mov bl, [rsi]
+    cmp bl, ' '
+    je .advance_ws
+    cmp bl, 10
+    je .advance_ws
+    cmp bl, 13
+    je .advance_ws
+    cmp bl, 9
+    je .advance_ws
+    jmp .check_sign
+
+.advance_ws:
+    inc rsi
+    jmp .skip_ws
+
+.check_sign:
+    mov r8, 1
+    cmp bl, '-'
+    jne .digits
+    mov r8, -1
+    inc rsi
+
+.digits:
+    xor rax, rax
+.digit_loop:
+    mov bl, [rsi]
+    cmp bl, '0'
+    jb .done
+    cmp bl, '9'
+    ja .done
+    imul rax, rax, 10
+    movzx rcx, bl
+    sub rcx, '0'
+    add rax, rcx
+    inc rsi
+    jmp .digit_loop
+
+.done:
+    cmp r8, 1
+    je .return
+    neg rax
+.return:
+    ret
+
+write_int:
+    lea rsi, [outbuf + 31]
+    mov byte [rsi], 10
+    mov rax, rdi
+    xor r9d, r9d
+    cmp rax, 0
+    jge .abs_ready
+    neg rax
+    mov r9b, 1
+
+.abs_ready:
+    cmp rax, 0
+    jne .convert
+    dec rsi
+    mov byte [rsi], '0'
+    jmp .maybe_sign
+
+.convert:
+    mov rcx, 10
+.convert_loop:
+    xor rdx, rdx
+    div rcx
+    add dl, '0'
+    dec rsi
+    mov [rsi], dl
+    test rax, rax
+    jne .convert_loop
+
+.maybe_sign:
+    cmp r9b, 0
+    je .print
+    dec rsi
+    mov byte [rsi], '-'
+
+.print:
+    lea rdx, [outbuf + 32]
+    sub rdx, rsi
+    mov eax, 1
+    mov edi, 1
+    syscall
+    ret
