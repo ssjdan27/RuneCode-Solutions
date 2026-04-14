@@ -1,0 +1,96 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. CANDY-TRAIL.
+       
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 WS-INPUT-LINE PIC X(50).
+       01 WS-N PIC 9(10) VALUE 0.
+       01 WS-S PIC 9(10) VALUE 1.
+       01 WS-M PIC 9(6) VALUE 0.
+       01 WS-POSITION PIC S9(10) VALUE 0.
+       01 WS-TURNS PIC 9(10) VALUE 0.
+       01 WS-OUTPUT PIC X(10).
+       01 WS-CARD-INDEX PIC 9(6) VALUE 0.
+       01 WS-SKIP-FLAG PIC 9 VALUE 0.
+       01 WS-I PIC 9(6) VALUE 0.
+       01 WS-J PIC 9(6) VALUE 0.
+       01 WS-TOTAL-MOVE PIC S9(10) VALUE 0.
+       01 WS-LEADING-POS PIC 9(6) VALUE 0.
+       
+       01 INPUT-BUFFER PIC X(50).
+       01 CARD-CMD PIC X(10).
+       01 CARD-VAL PIC S9(10).
+       
+       01 CARD-TABLE.
+           05 CARD-ENTRY OCCURS 200000 TIMES.
+               10 C-TYPE PIC X(10).
+               10 C-VALUE PIC S9(10).
+       
+       PROCEDURE DIVISION.
+           ACCEPT WS-INPUT-LINE.
+           UNSTRING WS-INPUT-LINE DELIMITED BY SPACE
+               INTO WS-N WS-S
+           END-UNSTRING.
+           
+           IF WS-S = 0 THEN
+               MOVE 1 TO WS-S
+           END-IF.
+           
+           ACCEPT WS-M.
+           MOVE WS-S TO WS-POSITION.
+           MOVE 0 TO WS-TURNS.
+           MOVE 1 TO WS-CARD-INDEX.
+           MOVE 0 TO WS-SKIP-FLAG.
+           
+           PERFORM VARYING WS-I FROM 1 BY 1
+               UNTIL WS-I > WS-M
+               ACCEPT INPUT-BUFFER
+               MOVE SPACES TO CARD-CMD
+               MOVE 0 TO CARD-VAL
+               UNSTRING INPUT-BUFFER DELIMITED BY SPACE
+                   INTO CARD-CMD CARD-VAL
+               END-UNSTRING
+               MOVE CARD-CMD TO C-TYPE(WS-I)
+               MOVE CARD-VAL TO C-VALUE(WS-I)
+           END-PERFORM.
+           
+           PERFORM UNTIL WS-POSITION >= WS-N
+               ADD 1 TO WS-TURNS
+               
+               IF WS-SKIP-FLAG = 1 THEN
+                   MOVE 0 TO WS-SKIP-FLAG
+               ELSE
+                   MOVE 0 TO WS-TOTAL-MOVE
+                   
+                   EVALUATE C-TYPE(WS-CARD-INDEX)
+                       WHEN "MOVE"
+                           MOVE C-VALUE(WS-CARD-INDEX)
+                               TO WS-TOTAL-MOVE
+                       WHEN "BONUS"
+                           MOVE C-VALUE(WS-CARD-INDEX)
+                               TO WS-TOTAL-MOVE
+                       WHEN "SKIP"
+                           MOVE 1 TO WS-SKIP-FLAG
+                   END-EVALUATE
+                   
+                   ADD WS-TOTAL-MOVE TO WS-POSITION
+                   IF WS-POSITION < 1 THEN
+                       MOVE 1 TO WS-POSITION
+                   END-IF
+               END-IF
+               
+               ADD 1 TO WS-CARD-INDEX
+               IF WS-CARD-INDEX > WS-M THEN
+                   MOVE 1 TO WS-CARD-INDEX
+               END-IF
+           END-PERFORM.
+           
+           MOVE WS-TURNS TO WS-OUTPUT.
+           PERFORM VARYING WS-LEADING-POS FROM 1 BY 1
+               UNTIL WS-LEADING-POS > 10
+                   OR WS-OUTPUT(WS-LEADING-POS:1) NOT = "0"
+           END-PERFORM.
+           
+           DISPLAY WS-OUTPUT(WS-LEADING-POS:)
+               NO ADVANCING.
+           STOP RUN.
