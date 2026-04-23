@@ -1,0 +1,17 @@
+/* This is a single-line comment */
+
+body {
+  margin: 23;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+}
+
+.box {
+  width: 200px;
+  height: 200px;
+  background: #3b82f6;
+  border-radius: 8px;
+}
