@@ -1,0 +1,52 @@
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #f1f5f9;
+}
+
+.timeline {
+  margin: 0;
+  padding: 24px 24px 24px 44px;
+  list-style: none;
+  width: 300px;
+  border: 2px solid #1e293b;
+  border-radius: 12px;
+  background: #fff;
+  font-family: 'Fira Code', sans-serif;
+  position: relative;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 24px;
+  top: 24px;
+  bottom: 24px;
+  width: 2px;
+  background: #334155;
+}
+
+li {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  align-items: center;
+  column-gap: 12px;
+  padding: 14px 0;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #0f172a;
+  border-radius: 50%;
+  background: #dbeafe;
+  z-index: 1;
+}
+
+p {
+  margin: 0;
+  font-size: 16px;
+  color: #0f172a;
+}
